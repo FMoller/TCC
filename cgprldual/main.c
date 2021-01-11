@@ -70,7 +70,7 @@ int evolves_cgp_bdd(Individual *population, Table *table, int *gates)
         set_parent(population, best_individual);
 		//printf("\n Pop:");
 		for(int i = 1; i < NPOP; i++){	
-			if (population[i].last_mut>=0){
+			if(population[i].last_mut>=0){
 				/*
 				*
 				* Change to CGP-RL, update of the occurrence and average matrix.
@@ -81,6 +81,10 @@ int evolves_cgp_bdd(Individual *population, Table *table, int *gates)
 				/*
 				* End of change
 				*/
+			}
+			if(population[i].last_mutf[0]>=0){
+				mat_ocof[population[i].last_mutf[0]][population[i].last_mutf[1]]++;
+				mat_decf[population[i].last_mutf[0]][population[i].last_mutf[1]]+=(population[i].score - mat_decf[population[i].last_mutf[0]][population[i].last_mutf[1]])/(mat_ocof[population[i].last_mutf[0]][population[i].last_mutf[1]]);
 			}
 		}
 
@@ -160,6 +164,10 @@ void optimize_circuit(Individual *population, Table *table, int *gates)
 				mat_oco[population[i].last_mut]++;
 				mat_dec[population[i].last_mut]+=(population[i].score - mat_dec[population[i].last_mut])*ALPHA;
 			}
+		}
+		if(population[i].last_mutf[0]>=0){
+			mat_ocof[population[i].last_mutf[0]][population[i].last_mutf[1]]++;
+			mat_decf[population[i].last_mutf[0]][population[i].last_mutf[1]]+=(population[i].score - mat_decf[population[i].last_mutf[0]][population[i].last_mutf[1]])/(mat_ocof[population[i].last_mutf[0]][population[i].last_mutf[1]]);
 		}
 		/*
 		* End of change
