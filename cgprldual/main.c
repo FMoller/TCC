@@ -164,10 +164,10 @@ void optimize_circuit(Individual *population, Table *table, int *gates)
 				mat_oco[population[i].last_mut]++;
 				mat_dec[population[i].last_mut]+=(population[i].score - mat_dec[population[i].last_mut])*ALPHA;
 			}
-		}
-		if(population[i].last_mutf[0]>=0){
-			mat_ocof[population[i].last_mutf[0]][population[i].last_mutf[1]]++;
-			mat_decf[population[i].last_mutf[0]][population[i].last_mutf[1]]+=(population[i].score - mat_decf[population[i].last_mutf[0]][population[i].last_mutf[1]])/(mat_ocof[population[i].last_mutf[0]][population[i].last_mutf[1]]);
+			if(population[i].last_mutf[0]>=0){
+				mat_ocof[population[i].last_mutf[0]][population[i].last_mutf[1]]++;
+				mat_decf[population[i].last_mutf[0]][population[i].last_mutf[1]]+=(population[i].score - mat_decf[population[i].last_mutf[0]][population[i].last_mutf[1]])/(mat_ocof[population[i].last_mutf[0]][population[i].last_mutf[1]]);
+			}
 		}
 		/*
 		* End of change

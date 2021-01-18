@@ -42,8 +42,8 @@ int NCOL;
 MTRand mRdn;
 int mat_oco[3];
 float mat_dec[3];
-inf mat_ocof[NGATES][NGATES]
-float mat_decf[NGATES][NGATES]
+int mat_ocof[NGATES][NGATES];
+float mat_decf[NGATES][NGATES];
 
 /**
  * GATE CODES
@@ -1317,7 +1317,7 @@ int find_minf(int linha){
 	float minval;
 	int minpos;
 	if(linha==0){
-		minval = mat_decf[1];
+		minval = mat_decf[linha][1];
 		minpos = 1;
 		for(int i=2;i<NGATES;i++){
 			if(mat_decf[linha][i]<minval){
@@ -1327,7 +1327,7 @@ int find_minf(int linha){
 		}
 	}
 	else{
-		minval = mat_decf[0];
+		minval = mat_decf[linha][0];
 		minpos = 0;
 		for(int i=1;i<NGATES;i++){
 			if(i!=linha && mat_decf[linha][i]<minval){
@@ -1363,6 +1363,7 @@ void mutate_gene(Individual *individual, int *gates, int gene_pos, int num_input
 		else
 		{
 				dice =  (int)(1000000*genRand(&mRdn));
+				int pos = get_gene_position(row, col);
 				if(dice%10==0){
 					temp = randomize(0, NGATES);
 					int pos = get_gene_position(row, col);
@@ -1374,7 +1375,7 @@ void mutate_gene(Individual *individual, int *gates, int gene_pos, int num_input
 					if(temp>7) printf("\n %d",temp);
 				}
 			individual->last_mutf[0] = individual->genotype[pos].gate-1;
-			individual->last_mutf[1] = temp-1;
+			individual->last_mutf[1] = gates[temp]-1;
 			individual->last_mut=2;
 		}
 	}
@@ -1397,6 +1398,7 @@ void mutate_gene(Individual *individual, int *gates, int gene_pos, int num_input
 			}
 			else{
 				dice =  (int)(1000000*genRand(&mRdn));
+				int pos = get_gene_position(row, col);
 				if(dice%10==0){
 					temp = randomize(0, NGATES);
 					int pos = get_gene_position(row, col);
@@ -1410,7 +1412,7 @@ void mutate_gene(Individual *individual, int *gates, int gene_pos, int num_input
 					if(temp>7) printf("\n %d",temp);
 				}
 			individual->last_mutf[0] = individual->genotype[pos].gate-1;
-			individual->last_mutf[1] = temp-1;
+			individual->last_mutf[1] = gates[temp]-1;
 			individual->last_mut=2;
 			}
 		}
