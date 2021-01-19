@@ -33,7 +33,7 @@
 long int maxgen;
 long int mediangen;
 int mutation;
-float ALPHA = 0.4;
+float ALPHA = 0.3;
 
 /**
 * @brief Function that implements the cartesian genetic programming evolutionary process to
@@ -158,7 +158,7 @@ void optimize_circuit(Individual *population, Table *table, int *gates)
 		for(int i = 1; i < NPOP; i++){	
 			if (population[i].last_mut>=0){
 				mat_oco[population[i].last_mut]++;
-				mat_dec[population[i].last_mut]+=(population[i].score - mat_dec[population[i].last_mut])*ALPHA;
+				mat_dec[population[i].last_mut]+=(population[i].num_transistors - mat_dec[population[i].last_mut])*ALPHA;
 			}
 		}
 		/*

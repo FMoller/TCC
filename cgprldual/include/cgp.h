@@ -1316,27 +1316,23 @@ int find_min(){
 int find_minf(int linha){
 	float minval;
 	int minpos;
-	if(linha==0){
+	
+	if (linha==0){
 		minval = mat_decf[linha][1];
 		minpos = 1;
-		for(int i=2;i<NGATES;i++){
-			if(mat_decf[linha][i]<minval){
-				minpos = i;
-				minval = mat_decf[linha][i];
-			}
-		}
 	}
 	else{
 		minval = mat_decf[linha][0];
 		minpos = 0;
-		for(int i=1;i<NGATES;i++){
-			if(i!=linha && mat_decf[linha][i]<minval){
+	}
+	for(int i=0;i<7;i++){
+		if(i!=linha){
+			if(mat_decf[linha][i]<minval){
 				minpos = i;
-				minval = mat_decf[linha][i];
+				minval= mat_decf[linha][i];
 			}
 		}
 	}
-
 	return minpos;
 	
 }
