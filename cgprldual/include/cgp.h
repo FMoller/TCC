@@ -1334,7 +1334,6 @@ int find_minf(int linha){
 		}
 	}
 	return minpos;
-	
 }
 /*
 *
@@ -1346,7 +1345,6 @@ void mutate_gene(Individual *individual, int *gates, int gene_pos, int num_input
 	int dice =  (int)(1000000*genRand(&mRdn));
 	if(dice%10==0){
 		int temp = randomize(0, 3);
-
 		int row = get_gene_row(gene_pos, num_inputs_table);
 		int col = get_gene_col(gene_pos, num_inputs_table);
 		if (temp == 0 || temp == 1)
@@ -1358,20 +1356,20 @@ void mutate_gene(Individual *individual, int *gates, int gene_pos, int num_input
 		}
 		else
 		{
-				dice =  (int)(1000000*genRand(&mRdn));
-				int pos = get_gene_position(row, col);
-				if(dice%10==0){
-					temp = randomize(0, NGATES);
-					int pos = get_gene_position(row, col);
-					individual->genotype[pos].gate = gates[temp];
-				}
-				else{
-					temp = find_minf(individual->genotype[pos].gate-1)+1;
-					individual->genotype[pos].gate = temp;
-					if(temp>7) printf("\n %d",temp);
-				}
+			dice =  (int)(1000000*genRand(&mRdn));
+			int pos = get_gene_position(row, col);
 			individual->last_mutf[0] = individual->genotype[pos].gate-1;
-			individual->last_mutf[1] = gates[temp]-1;
+			if(dice%10==0){
+				temp = randomize(0, NGATES);
+				int pos = get_gene_position(row, col);
+				individual->genotype[pos].gate = gates[temp];
+			}
+			else{
+				temp = find_minf(individual->genotype[pos].gate-1);
+				individual->genotype[pos].gate = temp+1;
+				if(temp>7) printf("\n %d",temp);
+			}
+			individual->last_mutf[1] = temp;
 			individual->last_mut=2;
 		}
 	}
@@ -1395,21 +1393,19 @@ void mutate_gene(Individual *individual, int *gates, int gene_pos, int num_input
 			else{
 				dice =  (int)(1000000*genRand(&mRdn));
 				int pos = get_gene_position(row, col);
+				individual->last_mutf[0] = individual->genotype[pos].gate-1;
 				if(dice%10==0){
 					temp = randomize(0, NGATES);
 					int pos = get_gene_position(row, col);
 					individual->genotype[pos].gate = gates[temp];
-					individual->last_mutf[0] = -1;
-					individual->last_mutf[1] = -1;
 				}
 				else{
-					temp = find_minf(individual->genotype[pos].gate-1)+1;
-					individual->genotype[pos].gate = temp;
+					temp = find_minf(individual->genotype[pos].gate-1);
+					individual->genotype[pos].gate = temp+1;
 					if(temp>7) printf("\n %d",temp);
 				}
-			individual->last_mutf[0] = individual->genotype[pos].gate-1;
-			individual->last_mutf[1] = gates[temp]-1;
-			individual->last_mut=2;
+				individual->last_mutf[1] = temp;
+				individual->last_mut=2;
 			}
 		}
 	}
