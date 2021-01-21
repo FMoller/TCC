@@ -647,12 +647,13 @@ int crossover(Individual* population, int num_inputs_table);
 * @param population - individual array struct
 * @return the individual with the higher score and the lower number of transistors
 */
-int find_optimized_individual(Individual *population);
+int find_optimized_individual(Individual *population, float tbet);
 
 /**
 * @brief Function to copy the best individual to the parent position
 * @param population - individual array struct
 * @param best_individual - the number of the best individual
+* @param tbet - the temperature bounded error tolerance
 * @return none
 */
 void set_parent(Individual* population, int best_individual);
@@ -2049,7 +2050,7 @@ int crossover(Individual *population, int num_inputs_table)
 
     return best_one;
 }
-
+/**
 int find_optimized_individual(Individual *population)
 {
     count_num_transistors_individual(&population[0]);
@@ -2068,7 +2069,45 @@ int find_optimized_individual(Individual *population)
     }
     return best_individual;
 }
-
+**/
+int find_optimized_individual(Individual *population, float tbet)
+{
+	char sat_ok[NPOP];
+	char flag_sat = 0;
+	char flag_sel = 0;
+	int best_individual = 0;
+	for (int i = 0; i < NPOP; i++){
+		if (population[i].score <= tbet){
+			sat_ok[i]=1;
+			flag_sat = 1;
+		}
+		else{
+			sat_ok[i]=0;
+		}
+	}
+	if(flag_sat){
+		for(int i=0;i<NPOP;i++){
+			if(sat_ok[i]){
+				if(flag_sel){
+					count_num_transistors_individual(&population[i]);
+					if(population[i].num_transistors <= population[best_individual].num_transistors){
+						count_num_transistors_individual(&population[i]);
+						best_individual = i;
+					}
+				}
+				else{
+					best_individual = i;
+					count_num_transistors_individual(&population[i]);
+					flag_sel = 1;
+				}
+			}
+		}
+	}
+	else{
+		best_individual = find_best_individual_sat_count(population);
+	}
+	return best_individual;
+}
 void set_parent(Individual *population, int best_individual)
 {
     copy_individual_data(&population[0], &population[best_individual]);
