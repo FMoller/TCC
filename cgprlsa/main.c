@@ -72,8 +72,8 @@ int evolves_cgp_bdd(Individual *population, Table *table, int *gates)
             apply_PM(population, gates, table->num_inputs);
         evaluate_population_sat_count(population, table);
 		//Restrição dinâmica que vai aumentando com a temperatura
-		if(generation<= (int)0.75*maxgen){
-			tbet= (int)(m_erro - generation*(m_erro/(0.75*maxgen)));
+		if(generation<= (int)(0.5*maxgen)){
+			tbet= (int)(m_erro - generation*(m_erro/(0.5*maxgen)));
 			if(tbet<0){
 				tbet=0;
 			}
@@ -82,18 +82,19 @@ int evolves_cgp_bdd(Individual *population, Table *table, int *gates)
 			tbet = 0;
 		}
         //best_individual = find_best_individual_sat_count(population);// Estou guardando essa função para lidar nos casos onde nenhum individuo conseguiu ter sat abaixo da temp da restrição
-		find_optimized_individual(population,tbet);
+		best_individual = find_optimized_individual(population,tbet);
         set_parent(population, best_individual);
-
+/**
         if (population[0].score == 0)
         {
             fprintf(out_file, "SAT COUNT: %ld INDIVIDUAL: %d GENERATION: %ld\n", population[0].score, best_individual, generation);
             fflush(out_file);
             break;
         }
+**/
         if (generation % 50000 == 0)
         {
-            fprintf(out_file, "SAT COUNT: %ld INDIVIDUAL: %d GENERATION: %ld\n", population[0].score, best_individual, generation);
+            fprintf(out_file, "SAT COUNT: %ld NUM TRANSISTORS: %d INDIVIDUAL: %d GENERATION: %ld\n", population[0].score,population[0].num_transistors, best_individual, generation);
             fflush(out_file);
         }
         if(bdd_getnodenum() >= (int) (0.75 * bdd_getallocnum()))
@@ -102,7 +103,7 @@ int evolves_cgp_bdd(Individual *population, Table *table, int *gates)
         }
         if(generation == maxgen)
         {
-            fprintf(out_file, "SAT COUNT: %ld INDIVIDUAL: %d GENERATION: %ld\n", population[0].score, best_individual, generation);
+            fprintf(out_file, "SAT COUNT: %ld NUM TRANSISTORS: %d INDIVIDUAL: %d GENERATION: %ld\n", population[0].score,population[0].num_transistors, best_individual, generation);
             fflush(out_file);
             return 0;
         }
