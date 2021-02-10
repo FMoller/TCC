@@ -2077,11 +2077,8 @@ int find_optimized_individual(Individual *population, float tbet)
 	char flag_sel = 0;
 	int best_individual = 0;
 	for (int i = NPOP-1; i >= 0; i--){
-		printf("Counting %d \n",i);
+
 		count_num_transistors_individual(&population[i]);
-		if(i==0 && population[i].num_transistors>0){
-			printf("Teste/n");
-		}
 		//printf("%d %d %ld\n",i,population[i].num_transistors,population[i].score);
 		if (population[i].score <= tbet){
 			sat_ok[i]=1;

@@ -60,19 +60,20 @@ int evolves_cgp_bdd(Individual *population, Table *table, int *gates)
     set_parent(population, best_individual);
 
     clone_parent(population);
+	find_population_active_genes(population, table->num_inputs);
     fprintf(out_file, "--------------------------\n");
     fflush(out_file);
     while (1)
     {
         if(mutation == 1)
-            apply_SAM(population, gates, table->num_inputs);
+		apply_SAM(population, gates, table->num_inputs);
         else if(mutation == 2)
             apply_SAM_plus_GAM(population, gates, table->num_inputs);
         else if(mutation == 3)
             apply_PM(population, gates, table->num_inputs);
         evaluate_population_sat_count(population, table);
 		//Restrição dinâmica que vai aumentando com a temperatura
-		if(generation<= (int)(0.5*maxgen)){
+		if(generation<= (int)(0.75*maxgen)){
 			tbet= (int)(m_erro - generation*(m_erro/(0.5*maxgen)));
 			if(tbet<0){
 				tbet=0;
@@ -81,6 +82,7 @@ int evolves_cgp_bdd(Individual *population, Table *table, int *gates)
 		else{
 			tbet = 0;
 		}
+		find_population_active_genes(population, table->num_inputs);
         //best_individual = find_best_individual_sat_count(population);// Estou guardando essa função para lidar nos casos onde nenhum individuo conseguiu ter sat abaixo da temp da restrição
 		best_individual = find_optimized_individual(population,tbet);
         set_parent(population, best_individual);
@@ -105,7 +107,7 @@ int evolves_cgp_bdd(Individual *population, Table *table, int *gates)
         {
             fprintf(out_file, "SAT COUNT: %ld NUM TRANSISTORS: %d INDIVIDUAL: %d GENERATION: %ld\n", population[0].score,population[0].num_transistors, best_individual, generation);
             fflush(out_file);
-            return 0;
+            break;
         }
 
         clone_parent(population);
