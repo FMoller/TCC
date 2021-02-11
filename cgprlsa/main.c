@@ -73,7 +73,7 @@ int evolves_cgp_bdd(Individual *population, Table *table, int *gates)
             apply_PM(population, gates, table->num_inputs);
         evaluate_population_sat_count(population, table);
 		//Restrição dinâmica que vai aumentando com a temperatura
-		if(generation<= (int)(0.75*maxgen)){
+		if(generation<= (int)(0.9*maxgen)){
 			tbet= (int)(m_erro - generation*(m_erro/(0.5*maxgen)));
 			if(tbet<0){
 				tbet=0;
@@ -107,7 +107,12 @@ int evolves_cgp_bdd(Individual *population, Table *table, int *gates)
         {
             fprintf(out_file, "SAT COUNT: %ld NUM TRANSISTORS: %d INDIVIDUAL: %d GENERATION: %ld\n", population[0].score,population[0].num_transistors, best_individual, generation);
             fflush(out_file);
-            break;
+            if (population[0].score == 0){
+				break;
+			}
+			else{
+				return 0;
+			}
         }
 
         clone_parent(population);
