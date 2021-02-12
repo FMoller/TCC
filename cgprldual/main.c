@@ -1,26 +1,38 @@
 /**
  * @file cgp.h
  *
- * @brief Cartesian Genetic Programming Algorithm
- *
+ * @brief Cartesian Genetic Programming Algorithm with mutation operator biased by 
+ * reinforcement learning. RL applied to the mutation of the types of logic functions 
+ * and the element type of the nodes (CGP-RL DUAL).
+ * 
  * @details This file implements the Cartesian Genetic Programming Algorithm based in 
  * those materials listed below.
  *  -Cartesian Genetic Programming - ISBN-10: 3642269982 ISBN-13: 978-3642269981
  *  -How to evolve complex circuits from scratch - DOI: 10.1109/ICES.2014.7008732
  *  -CGP with Guided and Single Active Mutations for Designing CLCs - DOI: 
+ *  -CGP-RL applied to logical function mutations https://doi.org/10.1007/978-3-030-61380-8_2
+ *  -CGP-RL applied to node elemente mutation and dual: DOI:
  * 
- * @author Lucas Augusto Müller de Souza (lucasmuller@ice.ufjf.br)
+ * @author Lucas Augusto Müller de Souza (lucasmuller@ice.ufjf.br) (Standart CGP implementation)
  * Computational Engineering student at Universidade Federal de Juiz de Fora
- *
+ * @author Frederico José Dias Möller (moller@ice.ufjf.br) (RL operator implementation)
+ * Computer Science master student at Universidade Federal de Juiz de Fora
  *
  * @copyright Distributed under the Mozilla Public License 2.0 ( https://opensource.org/licenses/MPL-2.0 )
  *
- * @code available at https://github.com/ciml/ciml-lib/tree/applied-soft-computing-2019
+ * @code available at https://github.com/FMoller/TCC/tree/master/cgprldual 
+ * @see https://github.com/FMoller/
+ * @see https://github.com/ciml/ciml-lib/tree/applied-soft-computing-2019 for the standart CGP code
  * @see https://github.com/lucasmullers/
  *
- * Created on: january 15, 2019
- * Updated on: october 27, 2019
- *
+ * Created on: january 15, 2019 (standart CGP)
+ * Updated on: october 27, 2019 (standart CGP)
+ * Created on: january 11, 2021
+ * Updated on: february 12, 2021
+ * 
+ * Warning: CGP-RL is designed to work with the SAM mutation type. This prototype was built 
+ * on a code that accepts the SAM, GAM and PM mutations. However, the RL operator is unlikely 
+ * to function properly in GAM and PM.
  */
 
 
@@ -33,7 +45,11 @@
 long int maxgen;
 long int mediangen;
 int mutation;
-float ALPHA = 0.3;
+/*
+ * ALPHA is the step size parameter for the RL operator aplied to when choosing which element
+ * of the node will mutate.
+*/
+float ALPHA = 0.3; 
 
 /**
 * @brief Function that implements the cartesian genetic programming evolutionary process to
@@ -68,26 +84,22 @@ int evolves_cgp_bdd(Individual *population, Table *table, int *gates)
         evaluate_population_sat_count(population, table);
         best_individual = find_best_individual_sat_count(population);
         set_parent(population, best_individual);
-		//printf("\n Pop:");
-		for(int i = 1; i < NPOP; i++){	
-			if(population[i].last_mut>=0){
-				/*
-				*
-				* Change to CGP-RL, update of the occurrence and average matrix.
-				*
-				*/
-				mat_oco[population[i].last_mut]++;
-				mat_dec[population[i].last_mut]+=(population[i].score - mat_dec[population[i].last_mut])*ALPHA;
-				/*
-				* End of change
-				*/
-			}
-			if(population[i].last_mutf[0]>=0){
-				mat_ocof[population[i].last_mutf[0]][population[i].last_mutf[1]]++;
-				mat_decf[population[i].last_mutf[0]][population[i].last_mutf[1]]+=(population[i].score - mat_decf[population[i].last_mutf[0]][population[i].last_mutf[1]])/(mat_ocof[population[i].last_mutf[0]][population[i].last_mutf[1]]);
-			}
-		}
-
+        /*
+         * RL Opeator update start
+        */
+        for(int i = 1; i < NPOP; i++){  
+            if(population[i].last_mut>=0){
+                mat_oco[population[i].last_mut]++;
+                mat_dec[population[i].last_mut]+=(population[i].score - mat_dec[population[i].last_mut])*ALPHA;
+            }
+            if(population[i].last_mutf[0]>=0){
+                mat_ocof[population[i].last_mutf[0]][population[i].last_mutf[1]]++;
+                mat_decf[population[i].last_mutf[0]][population[i].last_mutf[1]]+=(population[i].score - mat_decf[population[i].last_mutf[0]][population[i].last_mutf[1]])/(mat_ocof[population[i].last_mutf[0]][population[i].last_mutf[1]]);
+            }
+        }
+        /*
+         * RL Opeator update end
+        */
         if (population[0].score == 0)
         {
             fprintf(out_file, "SAT COUNT: %ld INDIVIDUAL: %d GENERATION: %ld \t %d \t %d \t %d \n", population[0].score, best_individual, generation,mat_oco[0],mat_oco[1],mat_oco[2]);
@@ -149,29 +161,27 @@ void optimize_circuit(Individual *population, Table *table, int *gates)
         else if (mutation == 3)
             apply_PM(population, gates, table->num_inputs);
         evaluate_population_sat_count(population, table);
-		
+        
 
         clear_population_active_genes(population);
         find_population_active_genes(population, table->num_inputs);
         best_individual = find_optimized_individual(population);
-		/*
-		*
-		* Change to CGP-RL, update of the occurrence and average matrix.
-		*
-		*/
-		for(int i = 1; i < NPOP; i++){	
-			if (population[i].last_mut>=0){
-				mat_oco[population[i].last_mut]++;
-				mat_dec[population[i].last_mut]+=(population[i].num_transistors - mat_dec[population[i].last_mut])*ALPHA;
-			}
-			if(population[i].last_mutf[0]>=0){
-				mat_ocof[population[i].last_mutf[0]][population[i].last_mutf[1]]++;
-				mat_decf[population[i].last_mutf[0]][population[i].last_mutf[1]]+=(population[i].num_transistors - mat_decf[population[i].last_mutf[0]][population[i].last_mutf[1]])/(mat_ocof[population[i].last_mutf[0]][population[i].last_mutf[1]]);
-			}
-		}
-		/*
-		* End of change
-		*/
+        /*
+         * RL Opeator update start
+        */
+        for(int i = 1; i < NPOP; i++){  
+            if (population[i].last_mut>=0){
+                mat_oco[population[i].last_mut]++;
+                mat_dec[population[i].last_mut]+=(population[i].num_transistors - mat_dec[population[i].last_mut])*ALPHA;
+            }
+            if(population[i].last_mutf[0]>=0){
+                mat_ocof[population[i].last_mutf[0]][population[i].last_mutf[1]]++;
+                mat_decf[population[i].last_mutf[0]][population[i].last_mutf[1]]+=(population[i].num_transistors - mat_decf[population[i].last_mutf[0]][population[i].last_mutf[1]])/(mat_ocof[population[i].last_mutf[0]][population[i].last_mutf[1]]);
+            }
+        }
+        /*
+         * RL Opeator update end
+        */
         set_parent(population, best_individual);
 
         if (generation % 50000 == 0)
@@ -208,16 +218,16 @@ void optimize_circuit(Individual *population, Table *table, int *gates)
 
 int main(int argc, char const *argv[])
 {
-	for(int i=0;i<3;i++){
-		mat_dec[i]=0;
-		mat_oco[i]=0;
-	}
-	for(int i=0;i<NGATES;i++){
-		for(int j=0;j<NGATES;j++){
-			mat_decf[i][j]=0;
-			mat_ocof[i][j]=0;
-		}
-	}
+    for(int i=0;i<3;i++){
+        mat_dec[i]=0;
+        mat_oco[i]=0;
+    }
+    for(int i=0;i<NGATES;i++){
+        for(int j=0;j<NGATES;j++){
+            mat_decf[i][j]=0;
+            mat_ocof[i][j]=0;
+        }
+    }
     int semente;
     mediangen = -1;
     sscanf(argv[2], "seed=%d", &semente);
@@ -225,8 +235,7 @@ int main(int argc, char const *argv[])
     sscanf(argv[4], "maxgen=%ld", &maxgen);
     sscanf(argv[5], "mutation=%d", &mutation);
     LB = NCOL/2;
-//    srand(semente);
-	mRdn = seedRand(semente);
+    mRdn = seedRand(semente);
 
     if (argc == 7)
     {
@@ -270,16 +279,16 @@ int main(int argc, char const *argv[])
     {
         if (evolves_cgp_bdd(population, table, gates))
         {
-			for(int i=0;i<3;i++){
-				mat_dec[i]=0;
-				mat_oco[i]=0;
-			}
-			for(int i=0;i<NGATES;i++){
-				for(int j=0;j<NGATES;j++){
-					mat_decf[i][j]=0;
-					mat_ocof[i][j]=0;
-				}
-			}
+            for(int i=0;i<3;i++){
+                mat_dec[i]=0;
+                mat_oco[i]=0;
+            }
+            for(int i=0;i<NGATES;i++){
+                for(int j=0;j<NGATES;j++){
+                    mat_decf[i][j]=0;
+                    mat_ocof[i][j]=0;
+                }
+            }
             optimize_circuit(population, table, gates);
         }
     }
