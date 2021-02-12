@@ -31,7 +31,7 @@
 long int maxgen;
 long int mediangen;
 int mutation;
-
+float limite = 0.75;
 long int spow( long int a, long int b){
 	long int val = 1;
 	for(int i=0;i<b;i++){
@@ -73,8 +73,8 @@ int evolves_cgp_bdd(Individual *population, Table *table, int *gates)
             apply_PM(population, gates, table->num_inputs);
         evaluate_population_sat_count(population, table);
 		//Restrição dinâmica que vai aumentando com a temperatura
-		if(generation<= (int)(0.9*maxgen)){
-			tbet= (int)(m_erro - generation*(m_erro/(0.5*maxgen)));
+		if(generation<= (int)(limite*maxgen)){
+			tbet= (int)(m_erro - generation*(m_erro/(limite*maxgen)));
 			if(tbet<0){
 				tbet=0;
 			}
