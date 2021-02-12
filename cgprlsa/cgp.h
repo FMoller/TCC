@@ -681,7 +681,7 @@ void print_population(Individual *population, int num_inputs_table);
 
 int randomize(int smaller_value, int greater_value)
 {
-	int temp = (int)(1000000*genRand(&mRdn));
+    int temp = (int)(1000000*genRand(&mRdn));
     return (int)(smaller_value + temp % (greater_value - smaller_value));
 }
 
@@ -2072,42 +2072,42 @@ int find_optimized_individual(Individual *population)
 **/
 int find_optimized_individual(Individual *population, float tbet)
 {
-	char sat_ok[NPOP];
-	char flag_sat = 0;
-	char flag_sel = 0;
-	int best_individual = 0;
-	for (int i = NPOP-1; i >= 0; i--){
+    char sat_ok[NPOP];
+    char flag_sat = 0;
+    char flag_sel = 0;
+    int best_individual = 0;
+    for (int i = NPOP-1; i >= 0; i--){
 
-		count_num_transistors_individual(&population[i]);
-		//printf("%d %d %ld\n",i,population[i].num_transistors,population[i].score);
-		if (population[i].score <= tbet){
-			sat_ok[i]=1;
-			flag_sat = 1;
-		}
-		else{
-			sat_ok[i]=0;
-		}
-	}
-	if(flag_sat){
-		for(int i=0;i<NPOP;i++){
-			//printf("%d %ld\n",population[i].num_transistors,population[i].score);
-			if(sat_ok[i]){
-				if(flag_sel){
-					if(population[i].num_transistors <= population[best_individual].num_transistors){
-						best_individual = i;
-					}
-				}
-				else{
-					best_individual = i;
-					flag_sel = 1;
-				}
-			}
-		}
-	}
-	else{
-		best_individual = find_best_individual_sat_count(population);
-	}
-	return best_individual;
+        count_num_transistors_individual(&population[i]);
+        //printf("%d %d %ld\n",i,population[i].num_transistors,population[i].score);
+        if (population[i].score <= tbet){
+            sat_ok[i]=1;
+            flag_sat = 1;
+        }
+        else{
+            sat_ok[i]=0;
+        }
+    }
+    if(flag_sat){
+        for(int i=0;i<NPOP;i++){
+            //printf("%d %ld\n",population[i].num_transistors,population[i].score);
+            if(sat_ok[i]){
+                if(flag_sel){
+                    if(population[i].num_transistors <= population[best_individual].num_transistors){
+                        best_individual = i;
+                    }
+                }
+                else{
+                    best_individual = i;
+                    flag_sel = 1;
+                }
+            }
+        }
+    }
+    else{
+        best_individual = find_best_individual_sat_count(population);
+    }
+    return best_individual;
 }
 void set_parent(Individual *population, int best_individual)
 {

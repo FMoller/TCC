@@ -33,11 +33,11 @@ long int mediangen;
 int mutation;
 float limite = 0.75;
 long int spow( long int a, long int b){
-	long int val = 1;
-	for(int i=0;i<b;i++){
-		val*=a;
-	}
-	return val;
+    long int val = 1;
+    for(int i=0;i<b;i++){
+        val*=a;
+    }
+    return val;
 }
 
 /**
@@ -52,39 +52,39 @@ long int spow( long int a, long int b){
 int evolves_cgp_bdd(Individual *population, Table *table, int *gates)
 {
     long int generation = 0;
-	long int m_erro = spow(2,table->num_inputs)*table->num_outputs;
-	long int tbet;
+    long int m_erro = spow(2,table->num_inputs)*table->num_outputs;
+    long int tbet;
     evaluate_parent_sat_count(population, table);
     evaluate_population_sat_count(population, table);
     int best_individual = find_best_individual_sat_count(population);
     set_parent(population, best_individual);
 
     clone_parent(population);
-	find_population_active_genes(population, table->num_inputs);
+    find_population_active_genes(population, table->num_inputs);
     fprintf(out_file, "--------------------------\n");
     fflush(out_file);
     while (1)
     {
         if(mutation == 1)
-		apply_SAM(population, gates, table->num_inputs);
+        apply_SAM(population, gates, table->num_inputs);
         else if(mutation == 2)
             apply_SAM_plus_GAM(population, gates, table->num_inputs);
         else if(mutation == 3)
             apply_PM(population, gates, table->num_inputs);
         evaluate_population_sat_count(population, table);
-		//Restrição dinâmica que vai aumentando com a temperatura
-		if(generation<= (int)(limite*maxgen)){
-			tbet= (int)(m_erro - generation*(m_erro/(limite*maxgen)));
-			if(tbet<0){
-				tbet=0;
-			}
-		}
-		else{
-			tbet = 0;
-		}
-		find_population_active_genes(population, table->num_inputs);
+        //Restrição dinâmica que vai aumentando com a temperatura
+        if(generation<= (int)(limite*maxgen)){
+            tbet= (int)(m_erro - generation*(m_erro/(limite*maxgen)));
+            if(tbet<0){
+                tbet=0;
+            }
+        }
+        else{
+            tbet = 0;
+        }
+        find_population_active_genes(population, table->num_inputs);
         //best_individual = find_best_individual_sat_count(population);// Estou guardando essa função para lidar nos casos onde nenhum individuo conseguiu ter sat abaixo da temp da restrição
-		best_individual = find_optimized_individual(population,tbet);
+        best_individual = find_optimized_individual(population,tbet);
         set_parent(population, best_individual);
 /**
         if (population[0].score == 0)
@@ -108,11 +108,11 @@ int evolves_cgp_bdd(Individual *population, Table *table, int *gates)
             fprintf(out_file, "SAT COUNT: %ld NUM TRANSISTORS: %d INDIVIDUAL: %d GENERATION: %ld\n", population[0].score,population[0].num_transistors, best_individual, generation);
             fflush(out_file);
             if (population[0].score == 0){
-				break;
-			}
-			else{
-				return 0;
-			}
+                break;
+            }
+            else{
+                return 0;
+            }
         }
 
         clone_parent(population);
@@ -141,7 +141,7 @@ void optimize_circuit(Individual *population, Table *table, int *gates)
 
     fprintf(out_file,"--------------------------\n");
     fflush(out_file);
-	printf("Algo errado \n");
+    printf("Algo errado \n");
     int best_individual = 0;
     long int generation = 0;
     clock_t start = clock();
@@ -201,7 +201,7 @@ int main(int argc, char const *argv[])
     sscanf(argv[5], "mutation=%d", &mutation);
     LB = NCOL/2;
 //    srand(semente);
-	mRdn = seedRand(semente);
+    mRdn = seedRand(semente);
     if (argc == 7)
     {
         out_file = fopen(argv[6], "w");
@@ -242,7 +242,7 @@ int main(int argc, char const *argv[])
 
     if(argc <= 7)
     {
-		evolves_cgp_bdd(population, table, gates);
+        evolves_cgp_bdd(population, table, gates);
     }
     else if(argc > 7)
     {
