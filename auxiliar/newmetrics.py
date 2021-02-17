@@ -14,6 +14,8 @@ min_datT=dict()
 diff_dat=dict()
 diff_datT=dict()
 mean_dat=dict()
+sr_dat=dict()
+sr_datT=dict()
 #a = leitor.captura(pastas["Pasta"].iloc[i],"ccp")
 #a = leitor.captura(pastas["Pasta"].iloc[i],problema)
 for problema in prblm["Problema"]:
@@ -58,6 +60,7 @@ for problema in prblm["Problema"]:
             mean_dat[pastas["algoritmo"].iloc[i]]=0
         if pastas["algoritmo"].iloc[i] not in diff_dat.keys():   
             diff_dat[pastas["algoritmo"].iloc[i]]=[]
+            sr_dat[pastas["algoritmo"].iloc[i]]=[]
         diff = []
         try:
             if i!=0 and problema=="cc":
@@ -86,13 +89,20 @@ for problema in prblm["Problema"]:
         min_dat[problema][pastas["algoritmo"].iloc[i]]=a.count(min_values[problema])
         min_datT[pastas["algoritmo"].iloc[i]]+=a.count(min_values[problema])
         mean_dat[pastas["algoritmo"].iloc[i]]+=np.sum(np.array(mean_values[problema])<amean)
-        
+        sr_dat[pastas["algoritmo"].iloc[i]].append(len(acp))
 for i in diff_dat.keys():
     try:
         diff_datT[i]=np.mean(diff_dat[i])
     except:
         print(i)
-            
+        
+    sr_datT[i] = np.sum(sr_dat[i])/(len(sr_dat[i])*25)
             
         
-    
+dt_struct["alg"] = list(min_datT.keys())
+dt_struct["Best"] = [min_datT[x] for x in min_datT.keys()]
+dt_struct["Mdiff"] = [diff_datT[x] for x in min_datT.keys()]
+dt_struct["Nscore"] = [mean_dat[x] for x in min_datT.keys()]
+dt_struct["SR"] = [sr_datT[x] for x in min_datT.keys()]
+df = pd.DataFrame(data=dt_struct)
+df.to_csv("nmetrics.csv")    
