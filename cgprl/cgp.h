@@ -1,25 +1,37 @@
 /**
  * @file cgp.h
  *
- * @brief Cartesian Genetic Programming Algorithm
- *
+ * @brief Cartesian Genetic Programming Algorithm with mutation operator biased by 
+ * reinforcement learning. RL applied to the mutation of the types of logic functions 
+ * and the element type of the nodes (CGP-RL DUAL).
+ * 
  * @details This file implements the Cartesian Genetic Programming Algorithm based in 
  * those materials listed below.
  *  -Cartesian Genetic Programming - ISBN-10: 3642269982 ISBN-13: 978-3642269981
  *  -How to evolve complex circuits from scratch - DOI: 10.1109/ICES.2014.7008732
  *  -CGP with Guided and Single Active Mutations for Designing CLCs - DOI: 
+ *  -CGP-RL applied to logical function mutations https://doi.org/10.1007/978-3-030-61380-8_2
  * 
- * @author Lucas Augusto Müller de Souza (lucasmuller@ice.ufjf.br)
+ * @author Lucas Augusto Müller de Souza (lucasmuller@ice.ufjf.br) (Standart CGP implementation)
  * Computational Engineering student at Universidade Federal de Juiz de Fora
- *
+ * @author Frederico José Dias Möller (moller@ice.ufjf.br) (RL operator implementation)
+ * Computer Science master student at Universidade Federal de Juiz de Fora
  *
  * @copyright Distributed under the Mozilla Public License 2.0 ( https://opensource.org/licenses/MPL-2.0 )
  *
- * @code available at https://github.com/ciml/ciml-lib/tree/applied-soft-computing-2019
+ * @code available at https://github.com/FMoller/TCC/tree/master/cgprldual 
+ * @see https://github.com/FMoller/
+ * @see https://github.com/ciml/ciml-lib/tree/applied-soft-computing-2019 for the standart CGP code
  * @see https://github.com/lucasmullers/
  *
- * Created on: january 15, 2019
- * Updated on: october 27, 2019
+ * Created on: january 15, 2019 (standart CGP)
+ * Updated on: october 27, 2019 (standart CGP)
+ * Created on: july 04, 2020
+ * Updated on: march 01, 2021
+ * 
+ * Warning: CGP-RL is designed to work with the SAM mutation type. This prototype was built 
+ * on a code that accepts the SAM, GAM and PM mutations. However, the RL operator is unlikely 
+ * to function properly in GAM and PM.
  */
 
 #include <stdio.h>
@@ -84,7 +96,7 @@ typedef struct Individual
     long int *score_per_output;
     long int score;
     int num_transistors;
-	int last_mut[2]; //Adaptation for CGP-RL
+    int last_mut[2]; //Adaptation for CGP-RL
 
 } Individual;
 
@@ -1292,27 +1304,27 @@ void initialize_individual(Individual *individual, int *gates, int num_inputs_ta
 *
 */
 int find_min(int linha){
-	float minval;
-	int minpos;
-	
-	if (linha==0){
-		minval = mat_dec[linha][1];
-		minpos = 1;
-	}
-	else{
-		minval = mat_dec[linha][0];
-		minpos = 0;
-	}
-	for(int i=0;i<7;i++){
-		if(i!=linha){
-			if(mat_dec[linha][i]<minval){
-				minpos = i;
-				minval= mat_dec[linha][i];
-			}
-		}
-	}
-	return minpos;
-	
+    float minval;
+    int minpos;
+    
+    if (linha==0){
+        minval = mat_dec[linha][1];
+        minpos = 1;
+    }
+    else{
+        minval = mat_dec[linha][0];
+        minpos = 0;
+    }
+    for(int i=0;i<7;i++){
+        if(i!=linha){
+            if(mat_dec[linha][i]<minval){
+                minpos = i;
+                minval= mat_dec[linha][i];
+            }
+        }
+    }
+    return minpos;
+    
 }
 /*
 *
@@ -1328,28 +1340,28 @@ void mutate_gene(Individual *individual, int *gates, int gene_pos, int num_input
     if (temp == 0 || temp == 1)
     {
         randomize_inputs(individual, row, col, temp, num_inputs_table);
-		individual->last_mut[0]=-1;
-		individual->last_mut[1]=-1;
+        individual->last_mut[0]=-1;
+        individual->last_mut[1]=-1;
     }
     else
     {
         int pos = get_gene_position(row, col);
-		int dice = rand();
-		if (dice%10 ==0){
-			temp = randomize(0, NGATES);
-			individual->last_mut[0] = individual->genotype[pos].gate-1;
-			individual->last_mut[1] = gates[temp]-1;
-			individual->genotype[pos].gate = gates[temp];
-			
-		}
-		else{
-			temp = find_min(individual->genotype[pos].gate-1)+1;
-			individual->last_mut[0] = individual->genotype[pos].gate-1;
-			individual->last_mut[1] = temp-1;
-			individual->genotype[pos].gate = temp;
-			if(temp>7) printf("\n %d",temp);
-		}
-		
+        int dice = rand();
+        if (dice%10 ==0){
+            temp = randomize(0, NGATES);
+            individual->last_mut[0] = individual->genotype[pos].gate-1;
+            individual->last_mut[1] = gates[temp]-1;
+            individual->genotype[pos].gate = gates[temp];
+            
+        }
+        else{
+            temp = find_min(individual->genotype[pos].gate-1)+1;
+            individual->last_mut[0] = individual->genotype[pos].gate-1;
+            individual->last_mut[1] = temp-1;
+            individual->genotype[pos].gate = temp;
+            if(temp>7) printf("\n %d",temp);
+        }
+        
     }
 }
 

@@ -68,21 +68,21 @@ int evolves_cgp_bdd(Individual *population, Table *table, int *gates)
         evaluate_population_sat_count(population, table);
         best_individual = find_best_individual_sat_count(population);
         set_parent(population, best_individual);
-		//printf("\n Pop:");
-		for(int i = 1; i < NPOP; i++){	
-			if (population[i].last_mut>=0){
-				/*
-				*
-				* Change to CGP-RL, update of the occurrence and average matrix.
-				*
-				*/
-				mat_oco[population[i].last_mut]++;
-				mat_dec[population[i].last_mut]+=(population[i].score - mat_dec[population[i].last_mut])*ALPHA;
-				/*
-				* End of change
-				*/
-			}
-		}
+        //printf("\n Pop:");
+        for(int i = 1; i < NPOP; i++){  
+            if (population[i].last_mut>=0){
+                /*
+                *
+                * Change to CGP-RL, update of the occurrence and average matrix.
+                *
+                */
+                mat_oco[population[i].last_mut]++;
+                mat_dec[population[i].last_mut]+=(population[i].score - mat_dec[population[i].last_mut])*ALPHA;
+                /*
+                * End of change
+                */
+            }
+        }
 
         if (population[0].score == 0)
         {
@@ -145,25 +145,25 @@ void optimize_circuit(Individual *population, Table *table, int *gates)
         else if (mutation == 3)
             apply_PM(population, gates, table->num_inputs);
         evaluate_population_sat_count(population, table);
-		
+        
 
         clear_population_active_genes(population);
         find_population_active_genes(population, table->num_inputs);
         best_individual = find_optimized_individual(population);
-		/*
-		*
-		* Change to CGP-RL, update of the occurrence and average matrix.
-		*
-		*/
-		for(int i = 1; i < NPOP; i++){	
-			if (population[i].last_mut>=0){
-				mat_oco[population[i].last_mut]++;
-				mat_dec[population[i].last_mut]+=(population[i].num_transistors - mat_dec[population[i].last_mut])*ALPHA;
-			}
-		}
-		/*
-		* End of change
-		*/
+        /*
+        *
+        * Change to CGP-RL, update of the occurrence and average matrix.
+        *
+        */
+        for(int i = 1; i < NPOP; i++){  
+            if (population[i].last_mut>=0){
+                mat_oco[population[i].last_mut]++;
+                mat_dec[population[i].last_mut]+=(population[i].score - mat_dec[population[i].last_mut])*ALPHA;
+            }
+        }
+        /*
+        * End of change
+        */
         set_parent(population, best_individual);
 
         if (generation % 50000 == 0)
@@ -200,10 +200,10 @@ void optimize_circuit(Individual *population, Table *table, int *gates)
 
 int main(int argc, char const *argv[])
 {
-	for(int i=0;i<3;i++){
-		mat_dec[i]=0;
-		mat_oco[i]=0;
-	}
+    for(int i=0;i<3;i++){
+        mat_dec[i]=0;
+        mat_oco[i]=0;
+    }
     int semente;
     mediangen = -1;
     sscanf(argv[2], "seed=%d", &semente);
@@ -212,7 +212,7 @@ int main(int argc, char const *argv[])
     sscanf(argv[5], "mutation=%d", &mutation);
     LB = NCOL/2;
 //    srand(semente);
-	mRdn = seedRand(semente);
+    mRdn = seedRand(semente);
 
     if (argc == 7)
     {
@@ -256,10 +256,10 @@ int main(int argc, char const *argv[])
     {
         if (evolves_cgp_bdd(population, table, gates))
         {
-			for(int i=0;i<3;i++){
-				mat_dec[i]=0;
-				mat_oco[i]=0;
-			}
+//            for(int i=0;i<3;i++){
+//                mat_dec[i]=0;
+//                mat_oco[i]=0;
+//            }
             optimize_circuit(population, table, gates);
         }
     }
