@@ -256,10 +256,10 @@ int main(int argc, char const *argv[])
     {
         if (evolves_cgp_bdd(population, table, gates))
         {
-//            for(int i=0;i<3;i++){
-//                mat_dec[i]=0;
-//                mat_oco[i]=0;
-//            }
+            for(int i=0;i<3;i++){
+                mat_dec[i]=0;
+                mat_oco[i]=0;
+            }
             optimize_circuit(population, table, gates);
         }
     }
