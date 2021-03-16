@@ -27,7 +27,6 @@ def intervals(parts, duration):
     Divides the duration in n intervals and return two arrays one with the
     start index of each interval and other with the end index
     """
-    
     part_duration = duration / parts
     return (np.array([int(np.round((i) * part_duration)) for i in range(parts)]),
             np.array([int(np.round((i+1) * part_duration)) for i in range(parts)]))
@@ -37,40 +36,11 @@ def md_intervals(intervals):
     It receives the arrays with the indices of entry and exit of the intervals
     and returns an array with the indices to the midpoint of the intervals.
     """
-    
     resultado=[]
     for i in range(len(intervals[0])):
         resultado.append((intervals[0][i]+intervals[1][i])/2)
     return resultado
 
-def centroide(intervalos,maximo,eixoX,eixoY,minimo=0,rsct=True):
-    eixoXm = np.zeros(intervalos)
-    eixoYm = np.zeros(intervalos)
-    valores = np.zeros(intervalos)
-    vx=[]
-    vy=[]
-    marcadores =intervals(intervalos,maximo-minimo)
-    for i in range(len(eixoX)):
-        V1x = eixoX.iloc[i]>=marcadores[0]
-        V2x = eixoX.iloc[i]<=marcadores[1]
-        Vx = V1x==V2x
-        eixoXm[Vx]+=eixoX.iloc[i]
-        if type(eixoY)==type([]):
-            eixoYm[Vx]+=eixoY[i]
-        else:
-            eixoYm[Vx]+=eixoY.iloc[i]
-        valores[Vx]+=1
-    for i in range(intervalos):
-        if valores[i]>0:
-            vx.append(eixoXm[i]/valores[i])
-            vy.append(eixoYm[i]/valores[i])
-        else:
-            vx.append((marcadores[0][i]+marcadores[1][i])/2)
-            vy.append(0)
-    if rsct:    
-        return (np.divide(eixoXm,valores),np.divide(eixoYm,valores),valores)
-    else:
-        return(vx,vy,valores)
 
 def autolabel(rects):
     """Attach a text label above each bar in *rects*, displaying its height."""
@@ -82,5 +52,15 @@ def autolabel(rects):
                     textcoords="offset points",
                     ha='center', va='bottom')
 
+def fcount(f_list, n_intervals=25, grouping=(2,2), norm=False):
+    """
+    Receive a list of tuples, each tuple containing the address of a CSV file,
+    the amount of the budget given to the problem and a list with the values of
+    the seeds of each independent execution. Also receive a number of intervals
+    into which the analysis is to be divided.
 
-
+    Returns * .eps figures containing bar graphs showing the number of changes
+    of each type by percentile (range) grouped according to the optional
+    grouping variable, normalized or not according to the norm flag.
+    """
+    
