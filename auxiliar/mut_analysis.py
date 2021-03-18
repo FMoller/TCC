@@ -52,15 +52,61 @@ def autolabel(rects):
                     textcoords="offset points",
                     ha='center', va='bottom')
 
-def fcount(f_list, n_intervals=25, grouping=(2,2), norm=False):
+def case_count(f_name, budget, n_intervals=25, norm=False):
     """
-    Receive a list of tuples, each tuple containing the address of a CSV file,
-    the amount of the budget given to the problem and a list with the values of
-    the seeds of each independent execution. Also receive a number of intervals
-    into which the analysis is to be divided.
+    Receive a csv filen name with the results of a problem, the the budget of 
+    the problem and the number of intervals into which the analysis is
+    to be divided.
 
-    Returns * .eps figures containing bar graphs showing the number of changes
-    of each type by percentile (range) grouped according to the optional
-    grouping variable, normalized or not according to the norm flag.
+    Returns one array with the midpoints of each interval and an matrix with
+    four lines and n_intervals columns with the number of the occurrences that
+    every kind of mutation generated a better individual for each interval.
+
+    The lines of the matrix are:
+    0 -> I1G mutation on the first input adress
+    1 -> I2G mutation on the second input adress
+    2 -> FG mutation on the node gate
+    3 -> OG mutation on the individual output
+
+    The norm flag unit-normalizes the values in the output
     """
+    file = pd.read_csv(f_name, sep='\t')
+    kind_dict = {'I1G':0, 'I2G':1, 'FG':2, 'OG':3}
+    if '_design' in f_name:
+        stt_gen = budget
+        stp_gen = np.min(file['Eval.'])
+    else:
+        stt_gen = np.max(file['Eval.'])
+        stp_gen = 0
+    (lim_inf,lim_sup) = intervals(n_intervals, stt_gen-stp_gen)
+    
+    cases = np.zeros((4,n_intervals))
+    for i in range(len(file)):
+        gen = stt_gen - file.iloc[i]['Eval.']
+        m_kind = file.iloc[i]['Mutation']
+        for j in range(n_intervals): #Not the best way, but it's ok for now
+            if gen < lim_sup[j]:
+                cases[kind_dict[m_kind], j] += 1
+                break
+    if norm:
+        for i in range(n_intervals):
+            total = cases[0][i] + cases[1][i] + cases[2][i] + cases[3][i]
+            if total != 0:
+                for j in range(4):
+                    cases[j][i] = cases[j][i]/total
+            
+                
+    return md_intervals((lim_inf,lim_sup)),cases
+
+
+def f_count(f_list, n_intervals=25, norm=False):
+    pass
+                
+        
+    
+    
+  
+    
+    
+    
     
