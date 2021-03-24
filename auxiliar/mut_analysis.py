@@ -100,13 +100,55 @@ def case_count(f_name, budget, n_intervals=25, norm=False):
 
 
 def f_count(f_list, n_intervals=25, norm=False):
-    pass
-                
-        
+    results = []
+    for (f_name,budget) in f_list:
+        case = case_count(f_name, budget, n_intervals, norm)
+        results.append(case)
     
+    return results
+
     
+
+NOMES2 = ['C17','cm42a','cm82a','cm138a','decod','f51m','majority','z4ml']
+NM2LED=[3000000,3200000,2000000,4800000,3000000,4800000,2000000,4200000]               
+f_list1 = [
+    ('C17_design.csv',3000000),
+    ('cm42a_design.csv',3200000),
+    ('cm82a_design.csv',2000000),
+    ('cm138a_design.csv',4800000),
+    ]        
+teste2 = f_count(f_list1) 
+teste = case_count('z4ml_opt.csv', NM2LED[3], n_intervals=25, norm=False)
   
-    
-    
+##fig,ax = plt.subplots()
+##ax.plot(teste[0],teste[1][0])
+##ax.plot(teste[0],teste[1][1])
+##ax.plot(teste[0],teste[1][2])
+##ax.plot(teste[0],teste[1][3])
+##plt.show()
+##
+
+width = 0.25
+results = teste2
+##fig, ax = plt.subplots()
+##ax.bar(np.array(results[0][0]),results[0][1][0])
+##plt.show()
+fig, ax = plt.subplots(2,2)
+for i in range(4):
+    j = int(i>=2)
+    k = int(i%2!=0)
+    print((j,k))
+    x = np.arange(len(results[i][0]))
+    ax[j][k].bar(x - 3*width/2,
+                results[i][1][0], width, label = 'I1G')
+    ax[j][k].bar(x - width/2,
+                results[i][1][1], width, label = 'I2G')
+    ax[j][k].bar(x + width/2,
+                results[i][1][2], width, label = 'FG')
+    ax[j][k].bar(x + 3*width/2,
+                results[i][1][3], width, label = 'OG')
+    #ax[j][k].set_xticks(results[i][0])
+    #fig.tight_layout()
+plt.show()
     
     
