@@ -41,6 +41,10 @@ def md_intervals(intervals):
         resultado.append((intervals[0][i]+intervals[1][i])/2)
     return resultado
 
+def md_placings(f_name, budget):
+    pass
+    
+    
 
 def autolabel(rects):
     """Attach a text label above each bar in *rects*, displaying its height."""
@@ -52,7 +56,7 @@ def autolabel(rects):
                     textcoords="offset points",
                     ha='center', va='bottom')
 
-def case_count(f_name, budget, n_intervals=25, norm=False):
+def case_count(f_name, budget, n_intervals=25, norm=False, sing=True):
     """
     Receive a csv filen name with the results of a problem, the the budget of 
     the problem and the number of intervals into which the analysis is
@@ -87,7 +91,8 @@ def case_count(f_name, budget, n_intervals=25, norm=False):
         for j in range(n_intervals): #Not the best way, but it's ok for now
             if gen < lim_sup[j]:
                 cases[kind_dict[m_kind], j] += 1
-                break
+                if sing:
+                    break
     if norm:
         for i in range(n_intervals):
             total = cases[0][i] + cases[1][i] + cases[2][i] + cases[3][i]
@@ -99,13 +104,62 @@ def case_count(f_name, budget, n_intervals=25, norm=False):
     return md_intervals((lim_inf,lim_sup)),cases
 
 
-def f_count(f_list, n_intervals=25, norm=False):
+
+def f_count(f_list, exit_file, n_intervals=25, norm=False, sp_type = 1 , w_og = False):
+    """
+    Receive a list of files with the budget and print 4 graphics
+
+    sp_type:
+    0 -> Just bar graph, non cummulative
+    1 -> Bar graph, nom cummulative and cummulative plot
+    2 -> Just cummulative plot
+    """
     results = []
+    c_results = []
     for (f_name,budget) in f_list:
-        case = case_count(f_name, budget, n_intervals, norm)
+        case = case_count(f_name, budget, n_intervals, norm, True)
+        c_case = case_count(f_name, budget, n_intervals, norm, False)
         results.append(case)
+        c_results.append(c_case)
     
-    return results
+    #return results
+    if w_og:
+        width = 0.20
+        dist = [-3*width/2, -width/2, width/2, 3*width/2]
+    else:
+        width = 0.30
+        dist = [-width, 0, width, 0]
+    fig, ax = plt.subplots(2,2)
+    for i in range(4):
+        j = int(i>=2)
+        k = int(i%2!=0)
+        print((j,k))
+        x = np.arange(len(results[i][0]))
+        if sp_type == 0 or sp_type == 1:
+            ax[j][k].bar(x + dist[0],
+                        results[i][1][0], width, label = 'I1G', color = 'tab:blue')   
+            ax[j][k].bar(x + dist[1],
+                        results[i][1][1], width, label = 'I2G', color = 'tab:orange')       
+            ax[j][k].bar(x + dist[2],
+                        results[i][1][2], width, label = 'FG', color = 'tab:green')  
+            ax[j][k].set_title(f_list[i][0][:-4])
+            if w_og:
+                ax[j][k].bar(x + dist[3],
+                        results[i][1][3], width, label = 'FG', color = 'tab:red')
+        if sp_type == 1 or sp_type == 2:
+            ax[j][k].set_title(f_list[i][0][:-4])
+            ax[j][k].plot(c_results[i][1][0], color = 'tab:blue')
+            ax[j][k].plot(c_results[i][1][1], color = 'tab:orange')
+            ax[j][k].plot(c_results[i][1][2], color = 'tab:green')
+            if w_og:
+                ax[j][k].plot(c_results[i][1][3], color = 'tab:red')
+    fig.subplots_adjust(left=0.07, bottom=0.07, right=0.950,
+                         top=0.945, wspace=0.07, hspace=0.1)
+    fig.text(0.5, 0.02, '4-percentile', ha='center')
+    fig.text(0.02, 0.5, 'Occurrence of improvements', va='center', rotation='vertical')
+    fig1 = plt.gcf()
+    fig1.set_size_inches((13, 11), forward=False)
+    fig.savefig(exit_file,dpi=100, format="png")
 
     
 
@@ -116,8 +170,26 @@ f_list1 = [
     ('cm42a_design.csv',3200000),
     ('cm82a_design.csv',2000000),
     ('cm138a_design.csv',4800000),
-    ]        
-teste2 = f_count(f_list1) 
+    ]
+f_list2 = [
+    ('C17_opt.csv',3000000),
+    ('cm42a_opt.csv',3200000),
+    ('cm82a_opt.csv',2000000),
+    ('cm138a_opt.csv',4800000),
+    ]
+f_list3 = [
+    ('decod_design.csv',3000000),
+    ('f51m_design.csv',4800000),
+    ('majority_design.csv',2000000),
+    ('z4ml_design.csv',4200000),
+    ]
+f_list4 = [
+    ('decod_opt.csv',3000000),
+    ('f51m_opt.csv',4800000),
+    ('majority_opt.csv',2000000),
+    ('z4ml_opt.csv',4200000),
+    ] 
+teste2 = f_count(f_list4, 'peq8optla.png', sp_type = 2, w_og = True) 
 teste = case_count('z4ml_opt.csv', NM2LED[3], n_intervals=25, norm=False)
   
 ##fig,ax = plt.subplots()
@@ -128,27 +200,6 @@ teste = case_count('z4ml_opt.csv', NM2LED[3], n_intervals=25, norm=False)
 ##plt.show()
 ##
 
-width = 0.25
-results = teste2
-##fig, ax = plt.subplots()
-##ax.bar(np.array(results[0][0]),results[0][1][0])
-##plt.show()
-fig, ax = plt.subplots(2,2)
-for i in range(4):
-    j = int(i>=2)
-    k = int(i%2!=0)
-    print((j,k))
-    x = np.arange(len(results[i][0]))
-    ax[j][k].bar(x - 3*width/2,
-                results[i][1][0], width, label = 'I1G')
-    ax[j][k].bar(x - width/2,
-                results[i][1][1], width, label = 'I2G')
-    ax[j][k].bar(x + width/2,
-                results[i][1][2], width, label = 'FG')
-    ax[j][k].bar(x + 3*width/2,
-                results[i][1][3], width, label = 'OG')
-    #ax[j][k].set_xticks(results[i][0])
-    #fig.tight_layout()
-plt.show()
+
     
     
