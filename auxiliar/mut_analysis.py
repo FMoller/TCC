@@ -42,8 +42,28 @@ def md_intervals(intervals):
     return resultado
 
 def md_placings(f_name, budget):
+##    file = pd.read_csv(f_name, sep='\t')
+##    if '_design' in f_name:
+##        stt_gen = budget
+##        stp_gen = np.min(file['Eval.'])
+##    else:
+##        #stt_gen = np.max(file['Eval.'])
+##        stt_gen = np.max(find_earlydes(f_name.split(sep='_')[0]+'_design.csv'))
+##        stp_gen = 0
+##    (lim_inf,lim_sup) = intervals(n_intervals, stt_gen-stp_gen)
+##    # f.loc[f['Seed']==1]['Eval.']
     pass
-    
+
+def find_endings(f_name):
+    """
+    Find the generation where the best seed in the des phase found a factible
+    solution
+    """
+    f = pd.read_csv(f_name, sep='\t')
+    best = []
+    for i in range(1,26):
+        best.append(np.min(f.loc[f['Seed']==i]['Eval.']))
+    return best
     
 
 def autolabel(rects):
@@ -80,10 +100,21 @@ def case_count(f_name, budget, n_intervals=25, norm=False, sing=True):
         stt_gen = budget
         stp_gen = np.min(file['Eval.'])
     else:
-        stt_gen = np.max(file['Eval.'])
+        #stt_gen = np.max(file['Eval.'])
+        stt_gen = np.max(find_endings(f_name.split(sep='_')[0]+'_design.csv'))
         stp_gen = 0
     (lim_inf,lim_sup) = intervals(n_intervals, stt_gen-stp_gen)
     
+    l_mdplc = 0
+    b = find_endings(f_name) 
+    while np.nan in b:
+        b.remove(np.nan)
+    md_plc = stt_gen - np.mean(b)
+    
+    for j in range(n_intervals):
+        if md_plc < lim_sup[j]:
+            l_mdplc = j
+            break
     cases = np.zeros((4,n_intervals))
     for i in range(len(file)):
         gen = stt_gen - file.iloc[i]['Eval.']
@@ -101,11 +132,11 @@ def case_count(f_name, budget, n_intervals=25, norm=False, sing=True):
                     cases[j][i] = cases[j][i]/total
             
                 
-    return md_intervals((lim_inf,lim_sup)),cases
+    return md_intervals((lim_inf,lim_sup)),cases,l_mdplc
 
 
 
-def f_count(f_list, exit_file, n_intervals=25, norm=False, sp_type = 1 , w_og = False):
+def f_count(f_list, exit_file, n_intervals=25, norm=False, sp_type = 1 , w_og = False, m_ed = False):
     """
     Receive a list of files with the budget and print 4 graphics
 
@@ -153,6 +184,8 @@ def f_count(f_list, exit_file, n_intervals=25, norm=False, sp_type = 1 , w_og = 
             ax[j][k].plot(c_results[i][1][2], color = 'tab:green')
             if w_og:
                 ax[j][k].plot(c_results[i][1][3], color = 'tab:red')
+        if m_ed:
+            ax[j][k].scatter(results[i][2],200 )
     fig.subplots_adjust(left=0.07, bottom=0.07, right=0.950,
                          top=0.945, wspace=0.07, hspace=0.1)
     fig.text(0.5, 0.02, '4-percentile', ha='center')
@@ -189,7 +222,7 @@ f_list4 = [
     ('majority_opt.csv',2000000),
     ('z4ml_opt.csv',4200000),
     ] 
-teste2 = f_count(f_list4, 'peq8optla.png', sp_type = 2, w_og = True) 
+teste2 = f_count(f_list4, 'peq8opt.png', sp_type = 1, w_og = True, m_ed = True) 
 teste = case_count('z4ml_opt.csv', NM2LED[3], n_intervals=25, norm=False)
   
 ##fig,ax = plt.subplots()
