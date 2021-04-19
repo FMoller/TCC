@@ -3,7 +3,7 @@ import pandas as pd
 import leitor
 from math import inf
 pastas = pd.read_csv("pastas.csv")
-prblm = pd.read_csv("problemas.csv")
+prblm = pd.read_csv("problemasnlogic.csv")
 print("START")
 dt_struct={"alg":[]}
 dt_dat=dict()
@@ -105,4 +105,4 @@ dt_struct["Mdiff"] = [diff_datT[x] for x in min_datT.keys()]
 dt_struct["Nscore"] = [mean_dat[x] for x in min_datT.keys()]
 dt_struct["SR"] = [sr_datT[x] for x in min_datT.keys()]
 df = pd.DataFrame(data=dt_struct)
-df.to_csv("nmetrics.csv")    
+df.to_csv("nmtricsnlogic.csv")    
