@@ -166,6 +166,8 @@ def f_count(f_list, exit_file, n_intervals=25, norm=False, sp_type = 1 , w_og = 
         k = int(i%2!=0)
         print((j,k))
         x = np.arange(len(results[i][0]))
+        plt.rcParams["axes.titlesize"] = "20"
+        ax[j][k].set_title(f_list[i][0][:-4])
         if sp_type == 0 or sp_type == 1:
             ax[j][k].bar(x + dist[0],
                         results[i][1][0], width, label = 'I1G', color = 'tab:blue')   
@@ -173,26 +175,35 @@ def f_count(f_list, exit_file, n_intervals=25, norm=False, sp_type = 1 , w_og = 
                         results[i][1][1], width, label = 'I2G', color = 'tab:orange')       
             ax[j][k].bar(x + dist[2],
                         results[i][1][2], width, label = 'FG', color = 'tab:green')  
-            ax[j][k].set_title(f_list[i][0][:-4])
+            
+            
             if w_og:
                 ax[j][k].bar(x + dist[3],
                         results[i][1][3], width, label = 'FG', color = 'tab:red')
         if sp_type == 1 or sp_type == 2:
-            ax[j][k].set_title(f_list[i][0][:-4])
-            ax[j][k].plot(c_results[i][1][0], color = 'tab:blue')
-            ax[j][k].plot(c_results[i][1][1], color = 'tab:orange')
-            ax[j][k].plot(c_results[i][1][2], color = 'tab:green')
+            #ax[j][k].set_title(f_list[i][0][:-4])
+            ax[j][k].plot(c_results[i][1][0], color = 'tab:blue', label = 'I1G')
+            ax[j][k].plot(c_results[i][1][1], color = 'tab:orange', label = 'I2G')
+            ax[j][k].plot(c_results[i][1][2], color = 'tab:green', label = 'FG')
+            if(j==0 and k==1):
+                ax[0][1].legend()
             if w_og:
                 ax[j][k].plot(c_results[i][1][3], color = 'tab:red')
         if m_ed:
             ax[j][k].scatter(results[i][2],200 )
-    fig.subplots_adjust(left=0.07, bottom=0.07, right=0.950,
-                         top=0.945, wspace=0.07, hspace=0.1)
+        plt.setp(ax[j][k].get_xticklabels(), fontsize=15)
+        plt.setp(ax[j][k].get_yticklabels(), fontsize=15)
+    
+         
+    plt.rcParams["font.size"] = "20"
+    
+    fig.subplots_adjust(left=0.1, bottom=0.07, right=0.950,
+                         top=0.945, wspace=0.12, hspace=0.18)
     fig.text(0.5, 0.02, '4-percentile', ha='center')
     fig.text(0.02, 0.5, 'Occurrence of improvements', va='center', rotation='vertical')
     fig1 = plt.gcf()
     fig1.set_size_inches((13, 11), forward=False)
-    fig.savefig(exit_file,dpi=100, format="png")
+    fig.savefig(exit_file,dpi=100, format="eps")
 
     
 
@@ -222,7 +233,7 @@ f_list4 = [
     ('majority_opt.csv',2000000),
     ('z4ml_opt.csv',4200000),
     ] 
-teste2 = f_count(f_list4, 'peq8opt.png', sp_type = 1, w_og = True, m_ed = True) 
+teste2 = f_count(f_list1, 'peq4des.eps', sp_type = 2, w_og = False, m_ed = False) 
 teste = case_count('z4ml_opt.csv', NM2LED[3], n_intervals=25, norm=False)
   
 ##fig,ax = plt.subplots()
