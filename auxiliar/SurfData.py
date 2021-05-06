@@ -14,6 +14,15 @@ import leitor
 import matplotlib.pyplot as plt
 from math import inf
 
+def mse_cols(cola, colb):
+    mse = 0
+    for i in range(len(cola)):
+        for j in range(3):
+            mse = (cola[i,j] - colb[i,j])**2
+    return mse/(len(cola)*3)
+            
+
+
 pastas = pd.read_csv("pastas_alpha.csv")
 prblm = pd.read_csv("problemas.csv")
 
