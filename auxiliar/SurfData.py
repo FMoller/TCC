@@ -20,6 +20,19 @@ def mse_cols(cola, colb):
         for j in range(3):
             mse = (cola[i,j] - colb[i,j])**2
     return mse/(len(cola)*3)
+
+def find_maxd(surface):
+    max_dist = 0
+    md0 = 0
+    md1 = -1
+    for i in range(len(surface[0])-1):
+        for j in range(i+1,len(surface[0])):
+            dist = mse_cols(surface[:,i,:],surface[:,j,:])
+            if dist > max_dist:
+                max_dist = dist
+                md0 = i
+                md1 = j
+    return (max_dist,i,j)
             
 
 
