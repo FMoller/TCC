@@ -18,7 +18,7 @@ def mse_cols(cola, colb):
     mse = 0
     for i in range(len(cola)):
         for j in range(3):
-            mse = (cola[i,j] - colb[i,j])**2
+            mse += (cola[i,j] - colb[i,j])**2
     return mse/(len(cola)*3)
 
 def find_maxd(surface):
@@ -29,15 +29,16 @@ def find_maxd(surface):
         for j in range(i+1,len(surface[0])):
             dist = mse_cols(surface[:,i,:],surface[:,j,:])
             if dist > max_dist:
+                #print('(',i,',',j,'):',dist) 
                 max_dist = dist
                 md0 = i
                 md1 = j
-    return (max_dist,i,j)
+    return (max_dist,md0,md1)
             
 
 
 pastas = pd.read_csv("pastas_alpha.csv")
-prblm = pd.read_csv("problemas.csv")
+prblm = pd.read_csv("problemas_ok.csv")
 
 surf = np.zeros((len(pastas['Pasta']), len(prblm['Problema'])))
 
@@ -103,17 +104,22 @@ for col in range(len(prblm['Problema'])):
 my_ticks = [sizes[i]+'\n '+str(i) for i in order]
 
 mse_col = dict()
-mse = 0
+#mse = 0
 closer = 0
+##for i in range(len(prblm['Problema'])):
+##    for k in range(len(pastas['Pasta'])):
+##        for j in range(3):
+##            mse += (surf3[k,6,j] - surf3[k,i,j])**2
+##    mse = mse/(3*(len(pastas['Pasta'])))
+
+
 for i in range(len(prblm['Problema'])):
-    for k in range(len(pastas['Pasta'])):
-        for j in range(3):
-            mse += (surf3[k,1,j] - surf3[k,i,j])**2
-    mse = mse/(3*(len(pastas['Pasta'])))
-    if mse in mse_col.keys():
-        print('doubled')
+    dist = mse_cols(surf3[:,3,:], surf3[:,i,:])
+    if dist in mse_col.keys():   
+        print('doubled:',i,':',my_ticks[i])
     else:
-        mse_col[mse] = [i,my_ticks[i]]
+        mse_col[dist] = [i,my_ticks[i]]
+    
 
 surf4 = np.zeros((len(pastas['Pasta']), len(prblm['Problema']), 3))
 order2 = list(mse_col.keys()).copy()
