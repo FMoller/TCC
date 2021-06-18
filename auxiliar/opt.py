@@ -13,7 +13,7 @@ def take_media(problem):
     return val
 
 def by_quart(problem,seed):
-    rate = np.zeros((4,25))
+    rate = np.zeros((5,25))
     arq = pd.read_csv(problem+"_"+str(seed))
     max_gen = arq.iloc[-2]['gen']
     for i in range(len(arq)-1):
@@ -26,10 +26,12 @@ def by_quart(problem,seed):
     return rate
 
 def quart_all(problem):
-    rate = np.zeros((4,25))
+    rate = np.zeros((5,25))
     for i in range(1,26):
         print(i)
         rate+=by_quart(problem,i)
+        rate[4,0]=i
+        np.savetxt(problem+".csv",rate,fmt='%1.0d',delimiter=",")
     return rate
 
         
