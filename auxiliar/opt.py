@@ -33,12 +33,27 @@ def quart_all(problem):
         rate[4,0]=i
         np.savetxt(problem+".csv",rate,fmt='%1.0d',delimiter=",")
     return rate
+   
+def take_mut(problem,seed):
+    arq = pd.read_csv(problem+"_"+str(seed))
+    return len(arq['gen']-1)/arq.iloc[-2]['gen']
 
-        
-        
-    
+def mean_mut(problem):
+    mean = 0
+    for i in range(1,26):
+        mean += take_mut(problem,i)
+    return mean/25
 
-#a = take_media("C17")
-a = quart_all("C17")       
+##
+###a = take_media("C17")
+prbs2 = ["cm42a","cm82a","cm138a","decod","majority","f51m","z4ml"]
+##prbs = ["z4ml"]
+##for i in prbs:
+##    try:
+##        a = quart_all(i)
+##    except:
+##        print("faild",i)
 
+for i in prbs2:
+    print(i+" : "+str(mean_mut(i)))
     
