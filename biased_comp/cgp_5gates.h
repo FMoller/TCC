@@ -40,8 +40,8 @@ FILE *out_file;
 int LB;
 int NCOL;
 MTRand mRdn;
-int mat_oco[3];
-float mat_dec[3];
+int mat_oco[5][5];
+float mat_dec[5][5];
 
 /**
  * GATE CODES
@@ -84,7 +84,7 @@ typedef struct Individual
     long int *score_per_output;
     long int score;
     int num_transistors;
-	int last_mut; //Adaptation for CGP-RL
+	int last_mut[2]; //Adaptation for CGP-RL
 
 } Individual;
 
@@ -1286,21 +1286,39 @@ void initialize_individual(Individual *individual, int *gates, int num_inputs_ta
 * Function that looks for the first occurrence of the lowest value in a row of the averages matrix, CGP-RL
 *
 */
-int find_min(){
-	float minval;
-	int minpos;
-	minval = mat_dec[0];
-	minpos = 0;
-
-	for(int i=0;i<3;i++){
-		if(mat_dec[i]<minval){
-			minpos = i;
-			minval= mat_dec[i];
-		}
-	}
-	return minpos;
-	
+/*
+*
+* Function that looks for the first occurrence of the lowest value in a row of the averages matrix, CGP-RL
+*
+*/
+int find_min(int linha){
+    float minval;
+    int minpos;
+    
+    if (linha==0){
+        minval = mat_dec[linha][1];
+        minpos = 1;
+    }
+    else{
+        minval = mat_dec[linha][0];
+        minpos = 0;
+    }
+    for(int i=0;i<5;i++){
+        if(i!=linha){
+            if(mat_dec[linha][i]<minval){
+                minpos = i;
+                minval= mat_dec[linha][i];
+            }
+        }
+    }
+    return minpos;
+    
 }
+/*
+*
+* The function below changed due to CGP-RL
+*
+*/
 /*
 *
 * The function below changed due to CGP-RL
@@ -1308,50 +1326,37 @@ int find_min(){
 */
 void mutate_gene(Individual *individual, int *gates, int gene_pos, int num_inputs_table)
 {
-	int dice =  (int)(1000000*genRand(&mRdn));
-	if(dice%10==0){
-		int temp = randomize(0, 3);
-
-		int row = get_gene_row(gene_pos, num_inputs_table);
-		int col = get_gene_col(gene_pos, num_inputs_table);
-		if (temp == 0 || temp == 1)
-		{
-			randomize_inputs(individual, row, col, temp, num_inputs_table);
-			individual->last_mut=temp;
-
-		}
-		else
-		{
-				temp = randomize(0, NGATES);
-				int pos = get_gene_position(row, col);
-				individual->genotype[pos].gate = gates[temp];
-				individual->last_mut=2;
-			
-		}
-	}
-	else{
-		int temp = find_min();
-		
-		int row = get_gene_row(gene_pos, num_inputs_table);
-		int col = get_gene_col(gene_pos, num_inputs_table);
-		
-		if(temp == 0){
-			randomize_inputs(individual, row, col, temp, num_inputs_table);
-			individual->last_mut=0;
-		}
-		else{
-			if(temp == 1){
-				randomize_inputs(individual, row, col, temp, num_inputs_table);
-				individual->last_mut=1;
-			}
-			else{
-				temp = randomize(0, NGATES);
-				int pos = get_gene_position(row, col);
-				individual->genotype[pos].gate = gates[temp];
-				individual->last_mut=2;
-			}
-		}
-	}
+    int dice =  (int)(1000000*genRand(&mRdn));
+    int temp = dice%3;
+    int row = get_gene_row(gene_pos, num_inputs_table);
+    int col = get_gene_col(gene_pos, num_inputs_table);
+    if (temp == 0 || temp == 1)
+    {
+        randomize_inputs(individual, row, col, temp, num_inputs_table);
+        individual->last_mut[0]=-1;
+        individual->last_mut[1]=-1;
+    }
+    else
+    {
+        int pos = get_gene_position(row, col);
+        dice =  (int)(1000000*genRand(&mRdn));
+        if (dice%10 ==0){
+            dice =  (int)(1000000*genRand(&mRdn));
+            temp = (dice%5);
+            individual->last_mut[0] = individual->genotype[pos].gate-1;
+            individual->last_mut[1] = gates[temp]-1;
+            individual->genotype[pos].gate = gates[temp];
+            
+        }
+        else{
+            temp = find_min(individual->genotype[pos].gate-1)+1;
+            individual->last_mut[0] = individual->genotype[pos].gate-1;
+            individual->last_mut[1] = temp-1;
+            individual->genotype[pos].gate = temp;
+            if(temp>5) printf("\n %d",temp);
+        }
+        
+    }
 }
 
 void mutate_output(Individual *individual, int gene_pos, int num_inputs_table)
@@ -1371,7 +1376,8 @@ void mutate_individual(Individual *individual, int *gates, int num_inputs_table,
     else
     {
         mutate_output(individual, sorted_gene, num_inputs_table);
-		individual->last_mut=-1;
+        individual->last_mut[0]=-1;
+        individual->last_mut[1]=-1;
     }
 }
 
@@ -1763,7 +1769,7 @@ int get_num_transistors(int gate)
         return 0;
         break;
     default:
-        fprintf(out_file, "Gate code unknow!\n");
+        fprintf(out_file, "Gate code unknow! %d \n", gate);
         exit(1);
         break;
     }
@@ -1859,7 +1865,7 @@ bdd get_bdd_output(bdd input0, int gate, bdd input1)
         return bdd_addref(input0);
         break;
     default:
-        fprintf(out_file, "Gate code unknow!\n");
+        fprintf(out_file, "Gate code unknow! %d \n", gate);
         exit(1);
         break;
     }
